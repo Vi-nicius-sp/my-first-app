@@ -1,48 +1,37 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, TextInput, View } from "react-native";
+import { fetchCharacters } from "@/services/list";
+import {useEffect, useState} from "react";
+import { FlatList, Text, View, Image} from "react-native";
 
-export default function Home() {
-    // bloco de codigo main
-    const [name,setName] = useState('')// atribuição por descontruição
-    const [idade,setIdade] = useState(parseInt(''))
-    const [peso,setPeso] = useState(parseFloat(''))
-    const [altura,setAltura] =useState(parseFloat(''))
-    const IMC = peso/(altura*altura)
-    
-    return ( //interface grafica que mostra a tela pro usuario
-        <View style={styles.body} >
-
-            <Text style={styles.title} >
-                 Hello World !!
-            </Text>
-
-            <TextInput 
-                placeholder=" Digite seu Nome: "
-                onChangeText ={setName}/>
-            <TextInput 
-                placeholder=" Digite sua Idade: "
-                onChangeText ={setIdade}/>
-            <TextInput 
-                placeholder=" Digite sua Peso: "
-                onChangeText ={setPeso}/>
-            <TextInput 
-                placeholder=" Digite sua Altura: "
-                onChangeText = {setAltura}/>
-
-            <Text style={styles.title} >
-                 Olá, {name} boa noite,seus dados são Idade: {idade} Altura: {altura} Peso: {peso} IMC: {IMC} 
-            </Text>
-
-        </View> 
-    );
+interface Personagem{
+    id: number;
+    name: string;
+    images: [string];
 }
 
-const styles = StyleSheet.create({
-    body: {
-        backgroundColor: "red", 
-        padding: "auto" 
-    }, 
-    title: {
-        fontSize: 19 
-    }
-})
+export default function home(){
+    const [personagens, setPersonagens] = useState(<[Personagem]>([]));
+    useEffect(() => {
+        async function carregarPersonagens() {
+            const dados = await fetchCharacters();
+            setPersonagens(dados.Characters);
+        }
+        carregarPersonagens();
+    }, []);
+
+    
+    return (
+        <View>
+            <Text>Lista de Personagens</Text>
+
+            <FlatList
+            data = {personagens}
+            keyExtractor={item => item.id.toString()}
+            renderItem={({item}) =>(
+                <View>
+                    <image source={{uri: item[0]}}></image>
+                    <Text>{item.name}</Text>
+                </View>
+            )}
+       </View>
+    )
+}
